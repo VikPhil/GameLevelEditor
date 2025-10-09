@@ -2,17 +2,27 @@ package ui;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
+import main.Editor;
+import manager.Tile;
+
 import static utilz.Constants.WindowConstants.WIDTH_RIGHT_BAR;
+import static utilz.Constants.WindowConstants.EDITOR_HEIGHT;
 import static utilz.Constants.WindowConstants.DEFAULT_TALE;
 
 public class RightBar {
 
 	private int x, y, width, height;
 	private ArrayList<MyButton> tileButtons = new ArrayList<MyButton>();
+	private Editor editor;
+	private Tile selectedTile;
 
-	public RightBar(int x, int y, int width, int height) {
+	public RightBar(int x, int y, int width, int height, Editor editor) {
+
+		this.editor = editor;
 		this.x = x;
 		this.y = y;
 		this.width = width;
@@ -30,9 +40,12 @@ public class RightBar {
 		int xOffset = bWidth + 5;
 
 		int tileCounter = 0;
+		int id = 0;
 
-		for (int i = 0; i < 8; i++) {
-			tileButtons.add(new MyButton(xPos + xOffset * tileCounter, yPos, bWidth, bHeight));
+		for (Tile tile : editor.getTileManager().getTiles()) {
+			tileButtons.add(new MyButton(xPos + xOffset * tileCounter, yPos, bWidth, bHeight, id));
+
+			id++;
 			tileCounter++;
 
 			if (tileCounter == 6) {
@@ -47,19 +60,49 @@ public class RightBar {
 		g.setColor(new Color(244, 164, 95));
 		g.fillRect(x, y, width, height);
 
-		drawButtons(g);
+		drawTileButtons(g);
+		drawSelectedTile(g);
 	}
 
-	private void drawButtons(Graphics g) {
-		for (MyButton b : tileButtons) {
-			b.draw(g);
+	private void drawSelectedTile(Graphics g) {
+		if (selectedTile != null) {
+			g.drawImage(selectedTile.getSprite(), WIDTH_RIGHT_BAR + 5, EDITOR_HEIGHT - DEFAULT_TALE, 50, 50, null);
+			g.setColor(Color.BLACK);
+			g.drawRect(WIDTH_RIGHT_BAR + 5, EDITOR_HEIGHT - DEFAULT_TALE, 50, 50);
 		}
+	}
+
+	private void drawTileButtons(Graphics g) {
+		for (MyButton b : tileButtons) {
+
+			// draw an image on a tile
+			g.drawImage(getButtonImage(b.getId()), b.getX(), b.getY(), b.getWidth(), b.getHeight(), null);
+
+			// tiles mouse moved
+			if (b.isMouseOver())
+				g.setColor(Color.RED);
+			else
+				g.setColor(Color.BLACK);
+
+			g.drawRect(b.getX(), b.getY(), b.getWidth(), b.getHeight());
+
+			// tiles mouse pressed
+			if (b.isMousePressed()) {
+				g.setColor(Color.WHITE);
+				g.drawRect(b.getX(), b.getY(), b.getWidth(), b.getHeight());
+			}
+
+		}
+	}
+
+	private BufferedImage getButtonImage(int id) {
+		return editor.getTileManager().getSpritesId(id);
 	}
 
 	public void mouseMoved(int x, int y) {
 
 		for (MyButton b : tileButtons) {
-			b.setMouseOver(false);		
+			b.setMouseOver(false);
 			if (b.getBounds().contains(x, y)) {
 				b.setMouseOver(true);
 				return;
@@ -69,13 +112,32 @@ public class RightBar {
 
 	public void mousePressed(int x, int y) {
 
-		for (MyButton b : tileButtons) 
+		for (MyButton b : tileButtons) {
 			b.setMousePressed(false);
-			for (MyButton b : tileButtons)
 			if (b.getBounds().contains(x, y)) {
 				b.setMousePressed(true);
 				return;
 			}
-		
+		}
+	}
+
+	public void mouseClicked(int x, int y) {
+		for (MyButton b : tileButtons) {
+			if (b.getBounds().contains(x, y)) {
+				selectedTile = editor.getTileManager().getTilesId(b.getId());
+				return;
+			}
+		}
+	}
+
+	public void mouseReleased(int x, int y) {
+
+		for (MyButton b : tileButtons)
+			b.resetBooleans();
+	}
+
+	// getters and setters
+	public Tile getSelectedTile() {
+		return selectedTile;
 	}
 }

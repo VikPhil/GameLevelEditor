@@ -16,8 +16,7 @@ public class MyMouseInput implements MouseListener, MouseMotionListener {
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
-		// TODO Auto-generated method stub
-
+		editorPanel.getEditor().mouseDragged(e.getX(), e.getY());
 	}
 
 	@Override
@@ -27,7 +26,7 @@ public class MyMouseInput implements MouseListener, MouseMotionListener {
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-
+		editorPanel.getEditor().mouseClicked(e.getX(), e.getY());
 	}
 
 	@Override
@@ -38,8 +37,7 @@ public class MyMouseInput implements MouseListener, MouseMotionListener {
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
-
+		editorPanel.getEditor().mouseReleased(e.getX(), e.getY());
 	}
 
 	@Override

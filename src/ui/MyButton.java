@@ -6,16 +6,17 @@ import java.awt.Rectangle;
 
 public class MyButton {
 
-	private int x, y, width, height;
+	private int x, y, width, height, id;
 	private Rectangle bounds;
 
 	private boolean mouseOver, mousePressed;
 
-	public MyButton(int x, int y, int width, int height) {
+	public MyButton(int x, int y, int width, int height, int id) {
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
+		this.id = id;
 
 		bounds = new Rectangle(x, y, width, height);
 	}
@@ -30,25 +31,29 @@ public class MyButton {
 
 	private void drawBody(Graphics g) {
 
-		if (mousePressed) {
+		if (mousePressed)
 			g.setColor(Color.GRAY);
-		} else
-			g.setColor(Color.WHITE);
+		else
+			g.setColor(Color.GREEN);
 
 		g.fillRect(x, y, width, height);
 	}
 
 	private void drawBorder(Graphics g) {
-		if (mouseOver) {
+
+		if (mouseOver)
 			g.setColor(Color.RED);
-			g.drawRect(x + 2, y + 2, width - 3, height - 3);
-			g.drawRect(x + 3, y + 3, width - 5, height - 5);
-		} else {
+		else
 			g.setColor(Color.BLACK);
-			g.drawRect(x, y, width, height);
-		}
+
+		g.drawRect(x - 1, y - 1, width + 1, height + 1);
 	}
 
+	public void resetBooleans() {
+		mousePressed = false;
+		mouseOver = false;
+	}
+	
 	// --getters and setters----------------------------------------
 
 	public void setMouseOver(boolean mouseOver) {
@@ -85,5 +90,9 @@ public class MyButton {
 
 	public Rectangle getBounds() {
 		return bounds;
+	}
+	
+	public int getId() {
+		return id;
 	}
 }
