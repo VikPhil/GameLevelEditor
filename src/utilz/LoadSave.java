@@ -7,6 +7,11 @@ import java.io.InputStream;
 import javax.imageio.ImageIO;
 
 public class LoadSave {
+	
+	// buttons-----------------------------------------------------------------------
+	public static final String BUTTON_RED_PRESSED = "buttons/button_red_pressed.png";
+	public static final String BUTTON_RED = "buttons/button_red.png";
+	// ----------------------------------------------------------------------------
 
 	// ground----------------------------------------------------------------------
 	public static final String SHADOWS = "ground/shadows.png";

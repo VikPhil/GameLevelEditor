@@ -8,8 +8,17 @@ public class MyButton {
 
 	private int x, y, width, height, id;
 	private Rectangle bounds;
-
+	
 	private boolean mouseOver, mousePressed;
+
+	public MyButton( int x, int y, int width, int height) {
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.height = height;
+
+		bounds = new Rectangle(x, y, width, height);
+	}
 
 	public MyButton(int x, int y, int width, int height, int id) {
 		this.x = x;
@@ -20,35 +29,7 @@ public class MyButton {
 
 		bounds = new Rectangle(x, y, width, height);
 	}
-
-	public void draw(Graphics g) {
-		// border
-		drawBorder(g);
-
-		// body
-		drawBody(g);
-	}
-
-	private void drawBody(Graphics g) {
-
-		if (mousePressed)
-			g.setColor(Color.GRAY);
-		else
-			g.setColor(Color.GREEN);
-
-		g.fillRect(x, y, width, height);
-	}
-
-	private void drawBorder(Graphics g) {
-
-		if (mouseOver)
-			g.setColor(Color.RED);
-		else
-			g.setColor(Color.BLACK);
-
-		g.drawRect(x - 1, y - 1, width + 1, height + 1);
-	}
-
+	
 	public void resetBooleans() {
 		mousePressed = false;
 		mouseOver = false;

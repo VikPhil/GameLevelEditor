@@ -3,6 +3,7 @@ package manager;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
+import objects.Tile;
 import utilz.LoadSave;
 
 public class TileManager {

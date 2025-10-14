@@ -7,16 +7,21 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import main.Editor;
-import manager.Tile;
+import objects.CanvasLayer;
+import objects.Tile;
 
 import static utilz.Constants.WindowConstants.WIDTH_RIGHT_BAR;
 import static utilz.Constants.WindowConstants.EDITOR_HEIGHT;
+import static utilz.Constants.WindowConstants.EDITOR_WIDTH;
 import static utilz.Constants.WindowConstants.DEFAULT_TALE;
 
 public class RightBar {
 
 	private int x, y, width, height;
+	
 	private ArrayList<MyButton> tileButtons = new ArrayList<MyButton>();
+	private MyButton bSave;
+	
 	private Editor editor;
 	private Tile selectedTile;
 
@@ -32,6 +37,9 @@ public class RightBar {
 	}
 
 	private void initButtons() {
+		
+		bSave = new MyButton(EDITOR_WIDTH - DEFAULT_TALE * 2, EDITOR_HEIGHT - 40, 100, 30);
+		
 
 		int bWidth = 50;
 		int bHeight = 50;
@@ -59,9 +67,33 @@ public class RightBar {
 		// background
 		g.setColor(new Color(244, 164, 95));
 		g.fillRect(x, y, width, height);
-
+		
+		drawButtons(g);
 		drawTileButtons(g);
 		drawSelectedTile(g);
+	}
+
+	private void drawButtons(Graphics g) {
+		
+		if(bSave.isMousePressed()) {
+			g.drawImage(editor.getButtonManager().getBRedPressed(), bSave.getX(), bSave.getY(), bSave.getWidth(), bSave.getHeight(), null);
+		}
+		else {
+			g.drawImage(editor.getButtonManager().getBRed(), bSave.getX(), bSave.getY(), bSave.getWidth(), bSave.getHeight(), null);
+		
+		}
+				
+		drawText(g);
+	}
+
+	private void drawText(Graphics g) {
+		
+		String text = "Save canvas";
+ 		
+		g.setFont(g.getFont().deriveFont(18f));
+		g.setColor(Color.BLUE);
+	
+		g.drawString(text, bSave.getX() - 3 , bSave.getY() - 3);
 	}
 
 	private void drawSelectedTile(Graphics g) {
@@ -111,6 +143,12 @@ public class RightBar {
 	}
 
 	public void mousePressed(int x, int y) {
+		
+		bSave.setMousePressed(false);
+		
+		if(bSave.getBounds().contains(x, y)) {
+			bSave.setMousePressed(true);
+		}
 
 		for (MyButton b : tileButtons) {
 			b.setMousePressed(false);
@@ -132,6 +170,8 @@ public class RightBar {
 
 	public void mouseReleased(int x, int y) {
 
+		bSave.resetBooleans();
+		
 		for (MyButton b : tileButtons)
 			b.resetBooleans();
 	}

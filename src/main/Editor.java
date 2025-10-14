@@ -1,9 +1,13 @@
 package main;
 
 import java.awt.Graphics;
+import java.util.ArrayList;
 
+import manager.ButtonManager;
 import manager.TileManager;
+import objects.CanvasLayer;
 import ui.RightBar;
+import utilz.LoadSaveFiles;
 
 import static utilz.Constants.WindowConstants.*;
 
@@ -16,18 +20,29 @@ public class Editor implements Runnable {
 
 	private RightBar rightBar;
 	private TileManager tileManager;
+	private ButtonManager buttonManager;
 
 	private Thread myThread;
 	private final int FPS = 60;
 
 	private int[][] lvl = new int[EDITOR_HEIGHT / DEFAULT_TALE][WIDTH_RIGHT_BAR / DEFAULT_TALE];
 
+	public ArrayList<CanvasLayer> canvas = new ArrayList<CanvasLayer>();
+
 	public Editor() {
 
+		createDefaultLevel();
+		
 		initClasses();
 		editorWindow = new EditorWindow(this);
 
 		startThread();
+	}
+
+	private void createDefaultLevel() {
+		LoadSaveFiles.CreateLayerFile("layer_0", lvl);
+		
+		canvas.add(new CanvasLayer(LoadSaveFiles.GetLayerData("layer_0", lvl)));
 	}
 
 	private void startThread() {
@@ -37,18 +52,16 @@ public class Editor implements Runnable {
 
 	private void initClasses() {
 		tileManager = new TileManager();
+		buttonManager = new ButtonManager();
 
 		rightBar = new RightBar(WIDTH_RIGHT_BAR, 0, DEFAULT_TALE * TALE_COUNT, EDITOR_HEIGHT, this);
+
 	}
 
 	public void draw(Graphics g) {
 
-		for (int i = 0; i < lvl.length; i++) {
-			for (int j = 0; j < lvl[i].length; j++) {
-				int id = lvl[i][j];
-				g.drawImage(tileManager.getSpritesId(id), j * 64, i * 64, null);
-			}
-		}
+		for (CanvasLayer cl: canvas)
+			cl.draw(g);
 
 		rightBar.draw(g);
 
@@ -68,7 +81,7 @@ public class Editor implements Runnable {
 			int tileX = x / 64;
 			int tileY = y / 64;
 
-			lvl[tileY][tileX] = rightBar.getSelectedTile().getId();
+			canvas.get(0).getCanvas()[tileY][tileX] = rightBar.getSelectedTile().getId();
 		}
 	}
 
@@ -148,6 +161,10 @@ public class Editor implements Runnable {
 		return tileManager;
 	}
 
+	public ButtonManager getButtonManager() {
+		return buttonManager;
+	}
+	
 	public void setDrawSelect(boolean drawSelect) {
 		this.drawSelect = drawSelect;
 	}
