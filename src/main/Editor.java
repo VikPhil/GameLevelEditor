@@ -1,7 +1,10 @@
 package main;
 
 import java.awt.Graphics;
+import java.io.File;
 import java.util.ArrayList;
+
+import javax.swing.plaf.synth.SynthOptionPaneUI;
 
 import manager.ButtonManager;
 import manager.TileManager;
@@ -29,20 +32,26 @@ public class Editor implements Runnable {
 
 	public ArrayList<CanvasLayer> canvas = new ArrayList<CanvasLayer>();
 
+	private String currentNameTxtFile;
+
 	public Editor() {
 
-		createDefaultLevel();
-		
+		initCanvasesOfLevel();
+
 		initClasses();
 		editorWindow = new EditorWindow(this);
 
 		startThread();
 	}
 
-	private void createDefaultLevel() {
-		LoadSaveFiles.CreateLayerFile("layer_0", lvl);
-		
-		canvas.add(new CanvasLayer(LoadSaveFiles.GetLayerData("layer_0", lvl)));
+	private void initCanvasesOfLevel() {
+
+		// LoadSaveFiles.CreateLayerFile(nameTxtFile, 0, lvl);
+
+		for (int i = 0; i < LoadSaveFiles.GetListOfFiles().length; i++) {
+			currentNameTxtFile = LoadSaveFiles.GetFileNameId(i);
+			canvas.add(new CanvasLayer(LoadSaveFiles.GetLayerData(currentNameTxtFile, lvl)));
+		}
 	}
 
 	private void startThread() {
@@ -60,7 +69,7 @@ public class Editor implements Runnable {
 
 	public void draw(Graphics g) {
 
-		for (CanvasLayer cl: canvas)
+		for (CanvasLayer cl : canvas)
 			cl.draw(g);
 
 		rightBar.draw(g);
@@ -77,11 +86,13 @@ public class Editor implements Runnable {
 
 	private void insertATile(int x, int y) {
 
+		int idCanvas = LoadSaveFiles.GetListOfFiles().length - 1;
+
 		if (rightBar.getSelectedTile() != null) {
 			int tileX = x / 64;
 			int tileY = y / 64;
 
-			canvas.get(0).getCanvas()[tileY][tileX] = rightBar.getSelectedTile().getId();
+			canvas.get(idCanvas).getCanvas()[tileY][tileX] = rightBar.getSelectedTile().getId();
 		}
 	}
 
@@ -164,8 +175,20 @@ public class Editor implements Runnable {
 	public ButtonManager getButtonManager() {
 		return buttonManager;
 	}
-	
+
 	public void setDrawSelect(boolean drawSelect) {
 		this.drawSelect = drawSelect;
+	}
+
+	public int[][] getLvl() {
+		return lvl;
+	}
+
+	public String getCurrentNameTextFile() {
+		return currentNameTxtFile;
+	}
+
+	public Thread getMyThread() {
+		return myThread;
 	}
 }

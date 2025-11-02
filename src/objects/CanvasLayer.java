@@ -1,6 +1,7 @@
 package objects;
 
 import java.awt.Graphics;
+import java.io.File;
 
 import main.Editor;
 import manager.TileManager;
@@ -9,6 +10,7 @@ public class CanvasLayer {
 
 	private int[][] canvas;
 	private TileManager tileManager;
+	
 
 	public CanvasLayer(int[][] canvas) {
 		this.canvas = canvas;
@@ -28,4 +30,5 @@ public class CanvasLayer {
 	public int[][] getCanvas() {
 		return canvas;
 	}
+	
 }

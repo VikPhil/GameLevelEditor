@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import main.Editor;
 import objects.CanvasLayer;
 import objects.Tile;
+import utilz.LoadSaveFiles;
 
 import static utilz.Constants.WindowConstants.WIDTH_RIGHT_BAR;
 import static utilz.Constants.WindowConstants.EDITOR_HEIGHT;
@@ -18,12 +19,15 @@ import static utilz.Constants.WindowConstants.DEFAULT_TALE;
 public class RightBar {
 
 	private int x, y, width, height;
-	
+
 	private ArrayList<MyButton> tileButtons = new ArrayList<MyButton>();
-	private MyButton bSave;
-	
+	private MyButton bLayer, bSave;
+
 	private Editor editor;
 	private Tile selectedTile;
+
+	private int countFile = 1;
+	private String currentFile;
 
 	public RightBar(int x, int y, int width, int height, Editor editor) {
 
@@ -37,9 +41,9 @@ public class RightBar {
 	}
 
 	private void initButtons() {
-		
-		bSave = new MyButton(EDITOR_WIDTH - DEFAULT_TALE * 2, EDITOR_HEIGHT - 40, 100, 30);
-		
+
+		bLayer = new MyButton("New layer", EDITOR_WIDTH - DEFAULT_TALE * 2, EDITOR_HEIGHT - 40, 100, 30);
+		bSave = new MyButton("Save layer", EDITOR_WIDTH - DEFAULT_TALE * 2, EDITOR_HEIGHT - 100, 100, 30);
 
 		int bWidth = 50;
 		int bHeight = 50;
@@ -67,33 +71,47 @@ public class RightBar {
 		// background
 		g.setColor(new Color(244, 164, 95));
 		g.fillRect(x, y, width, height);
-		
+
 		drawButtons(g);
 		drawTileButtons(g);
 		drawSelectedTile(g);
 	}
 
 	private void drawButtons(Graphics g) {
-		
-		if(bSave.isMousePressed()) {
-			g.drawImage(editor.getButtonManager().getBRedPressed(), bSave.getX(), bSave.getY(), bSave.getWidth(), bSave.getHeight(), null);
+
+		if (bSave.isMousePressed()) {
+			g.drawImage(editor.getButtonManager().getBBluePressed(), bSave.getX(), bSave.getY(), bSave.getWidth(),
+					bSave.getHeight(), null);
+		} else {
+			g.drawImage(editor.getButtonManager().getBBlue(), bSave.getX(), bSave.getY(), bSave.getWidth(),
+					bSave.getHeight(), null);
 		}
-		else {
-			g.drawImage(editor.getButtonManager().getBRed(), bSave.getX(), bSave.getY(), bSave.getWidth(), bSave.getHeight(), null);
-		
+
+		if (bLayer.isMousePressed()) {
+			g.drawImage(editor.getButtonManager().getBRedPressed(), bLayer.getX(), bLayer.getY(), bLayer.getWidth(),
+					bLayer.getHeight(), null);
+
+		} else {
+			g.drawImage(editor.getButtonManager().getBRed(), bLayer.getX(), bLayer.getY(), bLayer.getWidth(),
+					bLayer.getHeight(), null);
 		}
-				
-		drawText(g);
+
+		drawTextOfButton(g);
 	}
 
-	private void drawText(Graphics g) {
-		
-		String text = "Save canvas";
- 		
-		g.setFont(g.getFont().deriveFont(18f));
-		g.setColor(Color.BLUE);
-	
-		g.drawString(text, bSave.getX() - 3 , bSave.getY() - 3);
+	private void drawTextOfButton(Graphics g) {
+		bLayer.drawText(g);
+		bSave.drawText(g);
+	}
+
+	private void addCanvasLayer(int id) {
+
+		LoadSaveFiles.CreateLayerFile(editor.getCurrentNameTextFile(), id, editor.getLvl());
+
+		currentFile = LoadSaveFiles.GetFileName(editor.getCurrentNameTextFile(), id);
+
+		editor.canvas.add(new CanvasLayer(LoadSaveFiles.GetLayerData(currentFile, editor.getLvl())));			
+
 	}
 
 	private void drawSelectedTile(Graphics g) {
@@ -143,10 +161,15 @@ public class RightBar {
 	}
 
 	public void mousePressed(int x, int y) {
-		
+
+		bLayer.setMousePressed(false);
 		bSave.setMousePressed(false);
-		
-		if(bSave.getBounds().contains(x, y)) {
+
+		if (bLayer.getBounds().contains(x, y)) {
+			bLayer.setMousePressed(true);
+		}
+
+		if (bSave.getBounds().contains(x, y)) {
 			bSave.setMousePressed(true);
 		}
 
@@ -160,6 +183,17 @@ public class RightBar {
 	}
 
 	public void mouseClicked(int x, int y) {
+
+		if (bLayer.getBounds().contains(x, y)) {
+			addCanvasLayer(countFile++);
+			return;
+		}
+
+		if (bSave.getBounds().contains(x, y)) {
+			LoadSaveFiles.SaveLayer(currentFile, editor.canvas.get(countFile - 1).getCanvas());
+			return;
+		}
+
 		for (MyButton b : tileButtons) {
 			if (b.getBounds().contains(x, y)) {
 				selectedTile = editor.getTileManager().getTilesId(b.getId());
@@ -170,8 +204,9 @@ public class RightBar {
 
 	public void mouseReleased(int x, int y) {
 
+		bLayer.resetBooleans();
 		bSave.resetBooleans();
-		
+
 		for (MyButton b : tileButtons)
 			b.resetBooleans();
 	}

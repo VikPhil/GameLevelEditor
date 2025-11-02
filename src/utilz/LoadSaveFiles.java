@@ -9,8 +9,8 @@ import java.util.Scanner;
 public class LoadSaveFiles {
 
 	// the function creates a new file with layer data
-	public static void CreateLayerFile(String name, int[][] level) {
-		File newLayer = new File("res/" + name + ".txt");
+	public static void CreateLayerFile(String name, int id, int[][] level) {
+		File newLayer = new File("files/" + name + id + ".txt");
 
 		if (newLayer.exists()) {
 			System.out.println("File " + newLayer + " already exists");
@@ -49,7 +49,7 @@ public class LoadSaveFiles {
 	// converting the file data to an array
 	public static int[][] GetLayerData(String name, int[][] sizeLevel) {
 
-		File layerFile = new File("res/" + name + ".txt");
+		File layerFile = new File("files/" + name + ".txt");
 
 		if (layerFile.exists()) {
 			return ReadFromFile(layerFile, sizeLevel.length, sizeLevel[0].length);
@@ -83,15 +83,32 @@ public class LoadSaveFiles {
 	}
 
 	// saving the layer data in a file
-	private static void SaveLayer(String name, int[][] level) {
-		
-		File layer = new File("res/" + name + ".txt");
-		
-		if(layer.exists()) {
+	public static void SaveLayer(String name, int[][] level) {
+
+		File layer = new File("files/" + name + ".txt");
+
+		if (layer.exists()) {
 			Write2DArrToFile(layer, level);
-		}else {
+		} else {
 			System.out.println("File " + name + " doesn't exist");
 			return;
 		}
+	}
+
+	// getting a list of files from a folder
+	public static File[] GetListOfFiles() {
+
+		File folder = new File("files/");
+
+		return folder.listFiles();
+	}
+
+	public static String GetFileName(String name, int id) {
+		return (String) (name + id);
+	}
+
+	// we get the name of a separate file by the index
+	public static String GetFileNameId(int id) {
+		return GetListOfFiles()[id].getName().replace(".txt", "");
 	}
 }

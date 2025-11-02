@@ -8,10 +8,12 @@ public class MyButton {
 
 	private int x, y, width, height, id;
 	private Rectangle bounds;
+	private String text;
 	
 	private boolean mouseOver, mousePressed;
 
-	public MyButton( int x, int y, int width, int height) {
+	public MyButton(String text, int x, int y, int width, int height) {
+		this.text = text;
 		this.x = x;
 		this.y = y;
 		this.width = width;
@@ -33,6 +35,14 @@ public class MyButton {
 	public void resetBooleans() {
 		mousePressed = false;
 		mouseOver = false;
+	}
+	
+	public void drawText(Graphics g) {
+
+		g.setFont(g.getFont().deriveFont(18f));
+		g.setColor(Color.BLUE);
+
+		g.drawString(text, x + 5, y - 3);
 	}
 	
 	// --getters and setters----------------------------------------

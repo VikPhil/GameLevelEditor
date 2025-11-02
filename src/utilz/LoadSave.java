@@ -11,6 +11,8 @@ public class LoadSave {
 	// buttons-----------------------------------------------------------------------
 	public static final String BUTTON_RED_PRESSED = "buttons/button_red_pressed.png";
 	public static final String BUTTON_RED = "buttons/button_red.png";
+	public static final String BUTTON_BLUE_PRESSED = "buttons/button_blue_pressed.png";
+	public static final String BUTTON_BLUE = "buttons/button_blue.png";
 	// ----------------------------------------------------------------------------
 
 	// ground----------------------------------------------------------------------
