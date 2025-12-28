@@ -9,8 +9,11 @@ import java.util.Scanner;
 public class LoadSaveFiles {
 
 	// the function creates a new file with layer data
-	public static void CreateLayerFile(String name, int id, int[][] level) {
-		File newLayer = new File("files/" + name + id + ".txt");
+	public static void CreateLayerFile(String name, Integer id, int[][] level) {
+		
+		String fileName = name.split("\\_")[0];
+		
+		File newLayer = new File("files/" + fileName.concat("_" + id.toString()) + ".txt");
 
 		if (newLayer.exists()) {
 			System.out.println("File " + newLayer + " already exists");
@@ -55,6 +58,7 @@ public class LoadSaveFiles {
 			return ReadFromFile(layerFile, sizeLevel.length, sizeLevel[0].length);
 		} else {
 			System.out.println("File " + name + " doesn't exist");
+			System.out.println("Get layer data!!!");
 			return null;
 		}
 	}
@@ -103,9 +107,10 @@ public class LoadSaveFiles {
 		return folder.listFiles();
 	}
 
-	public static String GetFileName(String name, int id) {
-		return (String) (name + id);
-	}
+//	public static String GetFileName(String name, Integer id) {
+//		
+//		return name.concat(id.toString());
+//	}
 
 	// we get the name of a separate file by the index
 	public static String GetFileNameId(int id) {

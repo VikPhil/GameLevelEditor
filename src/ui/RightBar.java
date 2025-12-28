@@ -2,13 +2,13 @@ package ui;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import main.Editor;
 import objects.CanvasLayer;
 import objects.Tile;
+import utilz.Constants.OtherConstants;
 import utilz.LoadSaveFiles;
 
 import static utilz.Constants.WindowConstants.WIDTH_RIGHT_BAR;
@@ -26,8 +26,8 @@ public class RightBar {
 	private Editor editor;
 	private Tile selectedTile;
 
-	private int countFile = 1;
-	private String currentFile;
+	private String currentFileName;
+	private int addId, countFile;
 
 	public RightBar(int x, int y, int width, int height, Editor editor) {
 
@@ -36,8 +36,9 @@ public class RightBar {
 		this.y = y;
 		this.width = width;
 		this.height = height;
-
+		
 		initButtons();
+		
 	}
 
 	private void initButtons() {
@@ -75,6 +76,7 @@ public class RightBar {
 		drawButtons(g);
 		drawTileButtons(g);
 		drawSelectedTile(g);
+		
 	}
 
 	private void drawButtons(Graphics g) {
@@ -104,13 +106,18 @@ public class RightBar {
 		bSave.drawText(g);
 	}
 
-	private void addCanvasLayer(int id) {
+	private void addCanvasLayer() {
+		
+		int id = LoadSaveFiles.GetListOfFiles().length;
+		
+		id++;
+		
+		LoadSaveFiles.CreateLayerFile(OtherConstants.EmptyLayer, id, editor.getLvl());
 
-		LoadSaveFiles.CreateLayerFile(editor.getCurrentNameTextFile(), id, editor.getLvl());
-
-		currentFile = LoadSaveFiles.GetFileName(editor.getCurrentNameTextFile(), id);
-
-		editor.canvas.add(new CanvasLayer(LoadSaveFiles.GetLayerData(currentFile, editor.getLvl())));			
+		currentFileName = LoadSaveFiles.GetFileNameId(id-1);
+		
+		editor.canvas.add(new CanvasLayer(LoadSaveFiles.GetLayerData(currentFileName, editor.getLvl())));
+		
 
 	}
 
@@ -182,18 +189,21 @@ public class RightBar {
 		}
 	}
 
-	public void mouseClicked(int x, int y) {
-
-		if (bLayer.getBounds().contains(x, y)) {
-			addCanvasLayer(countFile++);
+	public void mouseClicked(int x, int y) {	
+		
+				
+		if (bLayer.getBounds().contains(x, y)) {	
+			addCanvasLayer();
 			return;
 		}
-
+		
+		
 		if (bSave.getBounds().contains(x, y)) {
-			LoadSaveFiles.SaveLayer(currentFile, editor.canvas.get(countFile - 1).getCanvas());
+			currentFileName = LoadSaveFiles.GetFileNameId(countFile);
+			LoadSaveFiles.SaveLayer(currentFileName, editor.canvas.get(countFile).getCanvas());	
 			return;
 		}
-
+		
 		for (MyButton b : tileButtons) {
 			if (b.getBounds().contains(x, y)) {
 				selectedTile = editor.getTileManager().getTilesId(b.getId());
@@ -207,6 +217,8 @@ public class RightBar {
 		bLayer.resetBooleans();
 		bSave.resetBooleans();
 
+		countFile = LoadSaveFiles.GetListOfFiles().length - 1;
+		
 		for (MyButton b : tileButtons)
 			b.resetBooleans();
 	}
@@ -214,5 +226,9 @@ public class RightBar {
 	// getters and setters
 	public Tile getSelectedTile() {
 		return selectedTile;
+	}	
+
+	public int getCountFile() {
+		return countFile;
 	}
 }

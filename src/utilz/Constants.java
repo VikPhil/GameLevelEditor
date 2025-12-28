@@ -13,4 +13,8 @@ public class Constants {
 		public static final int TALE_COUNT = 6;
 		public static final int WIDTH_RIGHT_BAR = EDITOR_WIDTH - DEFAULT_TALE * TALE_COUNT;
 	}
+	
+	public static class OtherConstants {
+		public static final String EmptyLayer = "layer_empty";
+	}
 }

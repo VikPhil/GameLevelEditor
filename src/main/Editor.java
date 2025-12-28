@@ -1,10 +1,7 @@
 package main;
 
 import java.awt.Graphics;
-import java.io.File;
 import java.util.ArrayList;
-
-import javax.swing.plaf.synth.SynthOptionPaneUI;
 
 import manager.ButtonManager;
 import manager.TileManager;
@@ -33,10 +30,10 @@ public class Editor implements Runnable {
 	public ArrayList<CanvasLayer> canvas = new ArrayList<CanvasLayer>();
 
 	private String currentNameTxtFile;
-
+	
+	private int idCanvas;
+	
 	public Editor() {
-
-		initCanvasesOfLevel();
 
 		initClasses();
 		editorWindow = new EditorWindow(this);
@@ -45,9 +42,9 @@ public class Editor implements Runnable {
 	}
 
 	private void initCanvasesOfLevel() {
-
-		// LoadSaveFiles.CreateLayerFile(nameTxtFile, 0, lvl);
-
+			
+		canvas.clear();
+		
 		for (int i = 0; i < LoadSaveFiles.GetListOfFiles().length; i++) {
 			currentNameTxtFile = LoadSaveFiles.GetFileNameId(i);
 			canvas.add(new CanvasLayer(LoadSaveFiles.GetLayerData(currentNameTxtFile, lvl)));
@@ -65,16 +62,18 @@ public class Editor implements Runnable {
 
 		rightBar = new RightBar(WIDTH_RIGHT_BAR, 0, DEFAULT_TALE * TALE_COUNT, EDITOR_HEIGHT, this);
 
+		initCanvasesOfLevel();
+
 	}
 
 	public void draw(Graphics g) {
 
+		rightBar.draw(g);
 		for (CanvasLayer cl : canvas)
 			cl.draw(g);
 
-		rightBar.draw(g);
-
 		drawSelectedTile(g);
+		
 	}
 
 	private void drawSelectedTile(Graphics g) {
@@ -86,8 +85,8 @@ public class Editor implements Runnable {
 
 	private void insertATile(int x, int y) {
 
-		int idCanvas = LoadSaveFiles.GetListOfFiles().length - 1;
-
+		idCanvas = LoadSaveFiles.GetListOfFiles().length - 1;
+		
 		if (rightBar.getSelectedTile() != null) {
 			int tileX = x / 64;
 			int tileY = y / 64;
@@ -184,11 +183,12 @@ public class Editor implements Runnable {
 		return lvl;
 	}
 
-	public String getCurrentNameTextFile() {
-		return currentNameTxtFile;
-	}
-
 	public Thread getMyThread() {
 		return myThread;
 	}
+	
+	public int getIdCanvas() {
+		return idCanvas;
+	}
+
 }
