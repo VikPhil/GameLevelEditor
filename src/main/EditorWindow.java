@@ -16,5 +16,7 @@ public class EditorWindow extends JFrame{
 		pack();
 		setLocationRelativeTo(null);
 		setVisible(true);
+		
+		editorPanel.requestFocus();
 	}
 }

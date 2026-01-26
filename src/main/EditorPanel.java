@@ -6,6 +6,7 @@ import java.awt.Graphics;
 
 import javax.swing.JPanel;
 
+import inputs.MyKeyboardInput;
 import inputs.MyMouseInput;
 
 import static utilz.Constants.WindowConstants.EDITOR_WIDTH;
@@ -21,12 +22,12 @@ public class EditorPanel extends JPanel{
 		this.editor = editor;
 		mouseInput = new MyMouseInput(this);
 		
-		addMouseListener(mouseInput);
-		addMouseMotionListener(mouseInput);
-		
 		setPanelSize();
 		
-		requestFocus();
+		addKeyListener(new MyKeyboardInput(this));
+		addMouseListener(mouseInput);
+		addMouseMotionListener(mouseInput);	
+		
 	}
 
 	private void setPanelSize() {		

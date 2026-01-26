@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import main.Editor;
 import objects.CanvasLayer;
@@ -20,14 +22,22 @@ public class RightBar {
 
 	private int x, y, width, height;
 
-	private ArrayList<MyButton> tileButtons = new ArrayList<MyButton>();
+	// private ArrayList<MyButton> tileButtons = new ArrayList<MyButton>();
+	private Map<MyButton, ArrayList<Tile>> map = new HashMap<MyButton, ArrayList<Tile>>();
+
 	private MyButton bLayer, bSave;
+	private MyButton bSingle, bGCorner, bGSide, bGIsland;
 
 	private Editor editor;
 	private Tile selectedTile;
 
 	private String currentFileName;
-	private int addId, countFile;
+	private int countFile;
+
+	private MyButton currentButton;
+
+	private int indexButton = 0;
+	int yPos = 10;
 
 	public RightBar(int x, int y, int width, int height, Editor editor) {
 
@@ -36,9 +46,9 @@ public class RightBar {
 		this.y = y;
 		this.width = width;
 		this.height = height;
-		
+
 		initButtons();
-		
+
 	}
 
 	private void initButtons() {
@@ -55,17 +65,46 @@ public class RightBar {
 		int tileCounter = 0;
 		int id = 0;
 
-		for (Tile tile : editor.getTileManager().getTiles()) {
-			tileButtons.add(new MyButton(xPos + xOffset * tileCounter, yPos, bWidth, bHeight, id));
+//		for (Tile tile : editor.getTileManager().getTiles()) {
+//			tileButtons.add(new MyButton(xPos + xOffset * tileCounter, yPos, bWidth, bHeight, id));
+//
+//			id++;
+//			tileCounter++;
+//
+//			if (tileCounter == 6) {
+//				tileCounter = 0;
+//				yPos += DEFAULT_TALE;
+//			}
+//		}
 
-			id++;
-			tileCounter++;
+		initMapButtons(bSingle, editor.getTileManager().getSingleTiles(), xPos, yPos, xOffset * tileCounter++, bWidth,
+				bHeight, id++);
+		initMapButtons(bGCorner, editor.getTileManager().getGrassCorners(), xPos, yPos, xOffset * tileCounter++, bWidth,
+				bHeight, id++);
+		initMapButtons(bGSide, editor.getTileManager().getGrassSides(), xPos, yPos, xOffset * tileCounter++, bWidth,
+				bHeight, id++);
+		initMapButtons(bGIsland, editor.getTileManager().getGrassIslands(), xPos, yPos, xOffset * tileCounter++, bWidth,
+				bHeight, id++);
 
-			if (tileCounter == 6) {
-				tileCounter = 0;
-				yPos += DEFAULT_TALE;
-			}
-		}
+	}
+
+	private void initMapButtons(MyButton b, ArrayList<Tile> list, int x, int y, int xOffset, int w, int h, int id) {
+
+		b = new MyButton(x + xOffset, y, w, h, id);
+		map.put(b, list);
+
+	}
+
+	// rotate sprites
+	public void changeSprite() {
+
+		indexButton++;
+
+		if (indexButton >= map.get(currentButton).size())
+			indexButton = 0;
+
+		selectedTile = map.get(currentButton).get(indexButton);
+
 	}
 
 	public void draw(Graphics g) {
@@ -73,13 +112,42 @@ public class RightBar {
 		g.setColor(new Color(244, 164, 95));
 		g.fillRect(x, y, width, height);
 
-		drawButtons(g);
-		drawTileButtons(g);
+		drawUiButtons(g);
 		drawSelectedTile(g);
-		
+		drawMapButtons(g);
 	}
 
-	private void drawButtons(Graphics g) {
+	private void drawMapButtons(Graphics g) {
+		// TODO Auto-generated method stub
+		for (Map.Entry<MyButton, ArrayList<Tile>> entry : map.entrySet()) {
+			MyButton b = entry.getKey();
+			BufferedImage img = entry.getValue().get(0).getSprite();
+
+			// draw an image on a tile
+			g.drawImage(img, b.getX(), b.getY(), b.getWidth(), b.getHeight(), null);
+
+			drawButtonFrames(g, b);
+
+		}
+	}
+
+	private void drawButtonFrames(Graphics g, MyButton b) {
+		// tiles mouse moved
+		if (b.isMouseOver())
+			g.setColor(Color.RED);
+		else
+			g.setColor(Color.BLACK);
+
+		g.drawRect(b.getX(), b.getY(), b.getWidth(), b.getHeight());
+
+		// tiles mouse pressed
+		if (b.isMousePressed()) {
+			g.setColor(Color.WHITE);
+			g.drawRect(b.getX(), b.getY(), b.getWidth(), b.getHeight());
+		}
+	}
+
+	private void drawUiButtons(Graphics g) {
 
 		if (bSave.isMousePressed()) {
 			g.drawImage(editor.getButtonManager().getBBluePressed(), bSave.getX(), bSave.getY(), bSave.getWidth(),
@@ -107,17 +175,16 @@ public class RightBar {
 	}
 
 	private void addCanvasLayer() {
-		
+
 		int id = LoadSaveFiles.GetListOfFiles().length;
-		
+
 		id++;
-		
+
 		LoadSaveFiles.CreateLayerFile(OtherConstants.EmptyLayer, id, editor.getLvl());
 
-		currentFileName = LoadSaveFiles.GetFileNameId(id-1);
-		
+		currentFileName = LoadSaveFiles.GetFileNameId(id - 1);
+
 		editor.canvas.add(new CanvasLayer(LoadSaveFiles.GetLayerData(currentFileName, editor.getLvl())));
-		
 
 	}
 
@@ -129,42 +196,21 @@ public class RightBar {
 		}
 	}
 
-	private void drawTileButtons(Graphics g) {
-		for (MyButton b : tileButtons) {
-
-			// draw an image on a tile
-			g.drawImage(getButtonImage(b.getId()), b.getX(), b.getY(), b.getWidth(), b.getHeight(), null);
-
-			// tiles mouse moved
-			if (b.isMouseOver())
-				g.setColor(Color.RED);
-			else
-				g.setColor(Color.BLACK);
-
-			g.drawRect(b.getX(), b.getY(), b.getWidth(), b.getHeight());
-
-			// tiles mouse pressed
-			if (b.isMousePressed()) {
-				g.setColor(Color.WHITE);
-				g.drawRect(b.getX(), b.getY(), b.getWidth(), b.getHeight());
-			}
-
-		}
-	}
-
 	private BufferedImage getButtonImage(int id) {
 		return editor.getTileManager().getSpritesId(id);
 	}
 
 	public void mouseMoved(int x, int y) {
 
-		for (MyButton b : tileButtons) {
+		for (MyButton b : map.keySet()) {
 			b.setMouseOver(false);
+
 			if (b.getBounds().contains(x, y)) {
 				b.setMouseOver(true);
 				return;
 			}
 		}
+
 	}
 
 	public void mousePressed(int x, int y) {
@@ -180,36 +226,45 @@ public class RightBar {
 			bSave.setMousePressed(true);
 		}
 
-		for (MyButton b : tileButtons) {
+		for (MyButton b : map.keySet()) {
 			b.setMousePressed(false);
+
 			if (b.getBounds().contains(x, y)) {
 				b.setMousePressed(true);
 				return;
 			}
 		}
+
 	}
 
-	public void mouseClicked(int x, int y) {	
-		
-				
-		if (bLayer.getBounds().contains(x, y)) {	
+	public void mouseClicked(int x, int y) {
+
+		if (bLayer.getBounds().contains(x, y)) {
 			addCanvasLayer();
 			return;
 		}
-		
-		
+
 		if (bSave.getBounds().contains(x, y)) {
 			currentFileName = LoadSaveFiles.GetFileNameId(countFile);
-			LoadSaveFiles.SaveLayer(currentFileName, editor.canvas.get(countFile).getCanvas());	
+			LoadSaveFiles.SaveLayer(currentFileName, editor.canvas.get(countFile).getCanvas());
 			return;
 		}
-		
-		for (MyButton b : tileButtons) {
+
+		for (MyButton b : map.keySet()) {
 			if (b.getBounds().contains(x, y)) {
-				selectedTile = editor.getTileManager().getTilesId(b.getId());
+				selectedTile = map.get(b).get(0);
+				currentButton = b;
+				indexButton = 0;
 				return;
 			}
 		}
+
+//		for (MyButton b : tileButtons) {
+//			if (b.getBounds().contains(x, y)) {
+//				selectedTile = editor.getTileManager().getTilesId(b.getId());
+//				return;
+//			}
+//		}
 	}
 
 	public void mouseReleased(int x, int y) {
@@ -218,17 +273,19 @@ public class RightBar {
 		bSave.resetBooleans();
 
 		countFile = LoadSaveFiles.GetListOfFiles().length - 1;
-		
-		for (MyButton b : tileButtons)
+
+		for (MyButton b : map.keySet()) {
 			b.resetBooleans();
+		}
 	}
 
 	// getters and setters
 	public Tile getSelectedTile() {
 		return selectedTile;
-	}	
+	}
 
 	public int getCountFile() {
 		return countFile;
 	}
+
 }

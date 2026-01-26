@@ -1,6 +1,7 @@
 package main;
 
 import java.awt.Graphics;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
 import manager.ButtonManager;
@@ -39,6 +40,7 @@ public class Editor implements Runnable {
 		editorWindow = new EditorWindow(this);
 
 		startThread();
+	
 	}
 
 	private void initCanvasesOfLevel() {
@@ -154,8 +156,7 @@ public class Editor implements Runnable {
 	}
 
 	public void mouseReleased(int x, int y) {
-
-		if (x >= WIDTH_RIGHT_BAR)
+		
 			rightBar.mouseReleased(x, y);
 	}
 
@@ -164,6 +165,12 @@ public class Editor implements Runnable {
 
 		} else
 			insertATile(x, y);
+	}
+	
+	public void keyPressed(KeyEvent e) {
+		if(e.getKeyCode() == KeyEvent.VK_R) {
+			rightBar.changeSprite();
+		}
 	}
 
 	// getters and setters

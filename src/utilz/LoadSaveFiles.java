@@ -107,11 +107,6 @@ public class LoadSaveFiles {
 		return folder.listFiles();
 	}
 
-//	public static String GetFileName(String name, Integer id) {
-//		
-//		return name.concat(id.toString());
-//	}
-
 	// we get the name of a separate file by the index
 	public static String GetFileNameId(int id) {
 		return GetListOfFiles()[id].getName().replace(".txt", "");
