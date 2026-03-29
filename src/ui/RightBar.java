@@ -1,11 +1,16 @@
 package ui;
 
 import java.awt.Color;
+import java.awt.Container;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.swing.JComboBox;
 
 import main.Editor;
 import objects.CanvasLayer;
@@ -22,11 +27,11 @@ public class RightBar {
 
 	private int x, y, width, height;
 
-	// private ArrayList<MyButton> tileButtons = new ArrayList<MyButton>();
 	private Map<MyButton, ArrayList<Tile>> map = new HashMap<MyButton, ArrayList<Tile>>();
 
 	private MyButton bLayer, bSave;
-	private MyButton bSingle, bGCorner, bGSide, bGIsland;
+	private MyButton bSingle, bGCorner, bGSide, bGIsland, bESide, bETop, bEBottom, bEGrassCor, bEGrassSide, bEAngle,
+			bRocks;
 
 	private Editor editor;
 	private Tile selectedTile;
@@ -37,7 +42,12 @@ public class RightBar {
 	private MyButton currentButton;
 
 	private int indexButton = 0;
-	int yPos = 10;
+
+	// ----------------------------
+	//public String[] elements = { "One", "Two", "Three" };
+	private DropdownList dropdownList;
+	private String[] elements;
+	// ----------------------------
 
 	public RightBar(int x, int y, int width, int height, Editor editor) {
 
@@ -61,36 +71,52 @@ public class RightBar {
 		int xPos = WIDTH_RIGHT_BAR + 32;
 		int yPos = 10;
 		int xOffset = bWidth + 5;
+		int yOffset = bHeight + 5;
 
 		int tileCounter = 0;
 		int id = 0;
 
-//		for (Tile tile : editor.getTileManager().getTiles()) {
-//			tileButtons.add(new MyButton(xPos + xOffset * tileCounter, yPos, bWidth, bHeight, id));
-//
-//			id++;
-//			tileCounter++;
-//
-//			if (tileCounter == 6) {
-//				tileCounter = 0;
-//				yPos += DEFAULT_TALE;
-//			}
-//		}
+		initMapButtons(bSingle, editor.getTileManager().getSingleTiles(), xPos, yPos, xOffset * tileCounter++, 0,
+				bWidth, bHeight, id++);
+		initMapButtons(bGCorner, editor.getTileManager().getGrassCorners(), xPos, yPos, xOffset * tileCounter++, 0,
+				bWidth, bHeight, id++);
+		initMapButtons(bGSide, editor.getTileManager().getGrassSides(), xPos, yPos, xOffset * tileCounter++, 0, bWidth,
+				bHeight, id++);
+		initMapButtons(bGIsland, editor.getTileManager().getGrassIsland(), xPos, yPos, xOffset * tileCounter++, 0,
+				bWidth, bHeight, id++);
+		initMapButtons(bESide, editor.getTileManager().getElevationSides(), xPos, yPos, xOffset * tileCounter++, 0,
+				bWidth, bHeight, id++);
+		initMapButtons(bEBottom, editor.getTileManager().getElevationBottom(), xPos, yPos, xOffset * tileCounter++, 0,
+				bWidth, bHeight, id++);
 
-		initMapButtons(bSingle, editor.getTileManager().getSingleTiles(), xPos, yPos, xOffset * tileCounter++, bWidth,
-				bHeight, id++);
-		initMapButtons(bGCorner, editor.getTileManager().getGrassCorners(), xPos, yPos, xOffset * tileCounter++, bWidth,
-				bHeight, id++);
-		initMapButtons(bGSide, editor.getTileManager().getGrassSides(), xPos, yPos, xOffset * tileCounter++, bWidth,
-				bHeight, id++);
-		initMapButtons(bGIsland, editor.getTileManager().getGrassIslands(), xPos, yPos, xOffset * tileCounter++, bWidth,
+		tileCounter = 0;
+
+		initMapButtons(bEGrassCor, editor.getTileManager().getElevGrassCorners(), xPos, yPos, xOffset * tileCounter++,
+				yOffset, bWidth, bHeight, id++);
+		initMapButtons(bEGrassSide, editor.getTileManager().getElevGrassSides(), xPos, yPos, xOffset * tileCounter++,
+				yOffset, bWidth, bHeight, id++);
+		initMapButtons(bETop, editor.getTileManager().getElevationTop(), xPos, yPos, xOffset * tileCounter++, yOffset,
+				bWidth, bHeight, id++);
+		initMapButtons(bEAngle, editor.getTileManager().getElevationAngle(), xPos, yPos, xOffset * tileCounter++,
+				yOffset, bWidth, bHeight, id++);
+		initMapButtons(bRocks, editor.getTileManager().getRocks(), xPos, yPos, xOffset * tileCounter++, yOffset, bWidth,
 				bHeight, id++);
 
+		// ---------------------
+		elements = new String[LoadSaveFiles.GetListOfFiles().length];
+		
+		for(int i = 0; i < elements.length;i++)
+			elements[i] = LoadSaveFiles.GetFileNameId(i);
+		
+		// ---------------------
+		dropdownList = new DropdownList(elements, xPos, yPos + xOffset * 3, 100, 30);
+		// ---------------------
 	}
 
-	private void initMapButtons(MyButton b, ArrayList<Tile> list, int x, int y, int xOffset, int w, int h, int id) {
+	private void initMapButtons(MyButton b, ArrayList<Tile> list, int x, int y, int xOffset, int yOffset, int w, int h,
+			int id) {
 
-		b = new MyButton(x + xOffset, y, w, h, id);
+		b = new MyButton(x + xOffset, y + yOffset, w, h, id);
 		map.put(b, list);
 
 	}
@@ -108,17 +134,12 @@ public class RightBar {
 	}
 
 	public void draw(Graphics g) {
-		// background
-		g.setColor(new Color(244, 164, 95));
-		g.fillRect(x, y, width, height);
-
 		drawUiButtons(g);
 		drawSelectedTile(g);
 		drawMapButtons(g);
 	}
 
 	private void drawMapButtons(Graphics g) {
-		// TODO Auto-generated method stub
 		for (Map.Entry<MyButton, ArrayList<Tile>> entry : map.entrySet()) {
 			MyButton b = entry.getKey();
 			BufferedImage img = entry.getValue().get(0).getSprite();
@@ -149,30 +170,34 @@ public class RightBar {
 
 	private void drawUiButtons(Graphics g) {
 
+		dropdownList.draw(g);
+
 		if (bSave.isMousePressed()) {
-			g.drawImage(editor.getButtonManager().getBBluePressed(), bSave.getX(), bSave.getY(), bSave.getWidth(),
-					bSave.getHeight(), null);
+			createUiButtons(g, bSave.getX() + 3, bSave.getY() + 3, bSave.getWidth() - 6, bSave.getHeight() - 6);
+			bSave.setFont(new Font("Arial", Font.BOLD, 16));
 		} else {
-			g.drawImage(editor.getButtonManager().getBBlue(), bSave.getX(), bSave.getY(), bSave.getWidth(),
-					bSave.getHeight(), null);
+			createUiButtons(g, bSave.getX(), bSave.getY(), bSave.getWidth(), bSave.getHeight());
+
 		}
 
 		if (bLayer.isMousePressed()) {
-			g.drawImage(editor.getButtonManager().getBRedPressed(), bLayer.getX(), bLayer.getY(), bLayer.getWidth(),
-					bLayer.getHeight(), null);
-
+			createUiButtons(g, bLayer.getX() + 3, bLayer.getY() + 3, bLayer.getWidth() - 6, bLayer.getHeight() - 6);
+			bLayer.setFont(new Font("Arial", Font.BOLD, 16));
 		} else {
-			g.drawImage(editor.getButtonManager().getBRed(), bLayer.getX(), bLayer.getY(), bLayer.getWidth(),
-					bLayer.getHeight(), null);
+			createUiButtons(g, bLayer.getX(), bLayer.getY(), bLayer.getWidth(), bLayer.getHeight());
 		}
 
-		drawTextOfButton(g);
+		bSave.writeText(g);
+		bLayer.writeText(g);
 	}
 
-	private void drawTextOfButton(Graphics g) {
-		bLayer.drawText(g);
-		bSave.drawText(g);
+	private void createUiButtons(Graphics g, int x, int y, int width, int height) {
+		g.setColor(Color.BLACK);
+		g.drawRect(x, y, width, height);
+		g.setColor(Color.WHITE);
+		g.fillRect(x, y, width, height);
 	}
+
 
 	private void addCanvasLayer() {
 
@@ -196,11 +221,13 @@ public class RightBar {
 		}
 	}
 
-	private BufferedImage getButtonImage(int id) {
-		return editor.getTileManager().getSpritesId(id);
-	}
-
 	public void mouseMoved(int x, int y) {
+
+		dropdownList.getBDropdown().setMouseOver(false);
+
+		if (dropdownList.getBDropdown().getBounds().contains(x, y)) {
+			dropdownList.getBDropdown().setMouseOver(true);
+		}
 
 		for (MyButton b : map.keySet()) {
 			b.setMouseOver(false);
@@ -217,6 +244,13 @@ public class RightBar {
 
 		bLayer.setMousePressed(false);
 		bSave.setMousePressed(false);
+
+		// -----------------------------------------------------
+		if (dropdownList.getBDropdown().getBounds().contains(x, y)) {
+			dropdownList.setUp(true);
+			dropdownList.setOpen(true);
+		}
+		// -----------------------------------------------------
 
 		if (bLayer.getBounds().contains(x, y)) {
 			bLayer.setMousePressed(true);
@@ -258,13 +292,6 @@ public class RightBar {
 				return;
 			}
 		}
-
-//		for (MyButton b : tileButtons) {
-//			if (b.getBounds().contains(x, y)) {
-//				selectedTile = editor.getTileManager().getTilesId(b.getId());
-//				return;
-//			}
-//		}
 	}
 
 	public void mouseReleased(int x, int y) {

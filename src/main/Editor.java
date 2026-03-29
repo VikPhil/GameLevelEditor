@@ -1,10 +1,14 @@
 package main;
 
+import java.awt.Container;
+import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
-import manager.ButtonManager;
+import javax.swing.JComboBox;
+
+import manager.AnimationsManager;
 import manager.TileManager;
 import objects.CanvasLayer;
 import ui.RightBar;
@@ -21,32 +25,35 @@ public class Editor implements Runnable {
 
 	private RightBar rightBar;
 	private TileManager tileManager;
-	private ButtonManager buttonManager;
+	private AnimationsManager animationManager;
 
 	private Thread myThread;
-	private final int FPS = 60;
+
+	private final int FPS = 120;
+	private final int UPS = 60;
 
 	private int[][] lvl = new int[EDITOR_HEIGHT / DEFAULT_TALE][WIDTH_RIGHT_BAR / DEFAULT_TALE];
 
 	public ArrayList<CanvasLayer> canvas = new ArrayList<CanvasLayer>();
 
 	private String currentNameTxtFile;
-	
+
 	private int idCanvas;
-	
+
+
+
 	public Editor() {
 
 		initClasses();
 		editorWindow = new EditorWindow(this);
-
 		startThread();
-	
+
 	}
 
 	private void initCanvasesOfLevel() {
-			
+
 		canvas.clear();
-		
+
 		for (int i = 0; i < LoadSaveFiles.GetListOfFiles().length; i++) {
 			currentNameTxtFile = LoadSaveFiles.GetFileNameId(i);
 			canvas.add(new CanvasLayer(LoadSaveFiles.GetLayerData(currentNameTxtFile, lvl)));
@@ -59,13 +66,18 @@ public class Editor implements Runnable {
 	}
 
 	private void initClasses() {
+
+		animationManager = new AnimationsManager();
 		tileManager = new TileManager();
-		buttonManager = new ButtonManager();
 
 		rightBar = new RightBar(WIDTH_RIGHT_BAR, 0, DEFAULT_TALE * TALE_COUNT, EDITOR_HEIGHT, this);
 
 		initCanvasesOfLevel();
 
+	}
+
+	private void update() {
+		animationManager.update();
 	}
 
 	public void draw(Graphics g) {
@@ -74,8 +86,9 @@ public class Editor implements Runnable {
 		for (CanvasLayer cl : canvas)
 			cl.draw(g);
 
+		animationManager.draw(g);
 		drawSelectedTile(g);
-		
+
 	}
 
 	private void drawSelectedTile(Graphics g) {
@@ -88,7 +101,7 @@ public class Editor implements Runnable {
 	private void insertATile(int x, int y) {
 
 		idCanvas = LoadSaveFiles.GetListOfFiles().length - 1;
-		
+
 		if (rightBar.getSelectedTile() != null) {
 			int tileX = x / 64;
 			int tileY = y / 64;
@@ -100,31 +113,43 @@ public class Editor implements Runnable {
 	@Override
 	public void run() {
 		double timePerFrame = 1_000_000_000.0 / FPS;
+		double timePerUpdate = 1_000_000_000.0 / UPS;
 
 		long previousTime = System.nanoTime();
 
 		int frames = 0;
-		double delta = 0;
+		double deltaF = 0;
+
+		int updates = 0;
+		double deltaU = 0;
 
 		long lastCheck = System.currentTimeMillis();
 
 		while (true) {
 			long currentTime = System.nanoTime();
 
-			delta += (currentTime - previousTime) / timePerFrame;
+			deltaF += (currentTime - previousTime) / timePerFrame;
+			deltaU += (currentTime - previousTime) / timePerUpdate;
 
 			previousTime = currentTime;
 
-			if (delta >= 1) {
+			if (deltaF >= 1) {
 				editorWindow.repaint();
 				frames++;
-				delta--;
+				deltaF--;
+			}
+
+			if (deltaU >= 1) {
+				update();
+				updates++;
+				deltaU--;
 			}
 
 			if (System.currentTimeMillis() - lastCheck >= 1000) {
 				lastCheck = System.currentTimeMillis();
-				System.out.println("FPS: " + frames);
+				System.out.println("FPS: " + frames + " |UPS: " + updates);
 				frames = 0;
+				updates = 0;
 			}
 		}
 
@@ -156,8 +181,8 @@ public class Editor implements Runnable {
 	}
 
 	public void mouseReleased(int x, int y) {
-		
-			rightBar.mouseReleased(x, y);
+
+		rightBar.mouseReleased(x, y);
 	}
 
 	public void mouseDragged(int x, int y) {
@@ -166,9 +191,9 @@ public class Editor implements Runnable {
 		} else
 			insertATile(x, y);
 	}
-	
+
 	public void keyPressed(KeyEvent e) {
-		if(e.getKeyCode() == KeyEvent.VK_R) {
+		if (e.getKeyCode() == KeyEvent.VK_R) {
 			rightBar.changeSprite();
 		}
 	}
@@ -176,10 +201,6 @@ public class Editor implements Runnable {
 	// getters and setters
 	public TileManager getTileManager() {
 		return tileManager;
-	}
-
-	public ButtonManager getButtonManager() {
-		return buttonManager;
 	}
 
 	public void setDrawSelect(boolean drawSelect) {
@@ -193,9 +214,13 @@ public class Editor implements Runnable {
 	public Thread getMyThread() {
 		return myThread;
 	}
-	
+
 	public int getIdCanvas() {
 		return idCanvas;
+	}
+
+	public ArrayList<CanvasLayer> getCanvas() {
+		return canvas;
 	}
 
 }
